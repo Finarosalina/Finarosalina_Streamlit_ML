@@ -7,8 +7,8 @@ import plotly.express as px
 import warnings
 
 # Cargar modelo y escalador
-model = joblib.load("models/knn_model.pkl")
-scaler = joblib.load("models/scaler.pkl")
+model = joblib.load("src/models/knn_model.pkl")
+scaler = joblib.load("src/models/scaler.pkl")
 
 
 
@@ -36,3 +36,26 @@ if st.button("Predecir calidad"):
     # Mapear resultado
     calidad = {0: "Baja", 1: "Media", 2: "Alta"}
     st.success(f"✅ Este vino probablemente sea de **calidad {calidad[prediction]}**.")
+
+try:
+    model = joblib.load("models/knn_model.pkl")
+    scaler = joblib.load("models/scaler.pkl")
+except FileNotFoundError:
+    st.error("Error: No se encontró el archivo del modelo o el escalador.")
+    st.stop()
+
+try:
+    df = pd.read_csv(url, sep=";")
+except Exception as e:
+    st.error(f"Error al cargar el dataset: {e}")
+    st.stop()
+
+# Mostrar gráfico de la calidad predicha
+fig = px.bar(
+    x=["Baja", "Media", "Alta"],
+    y=[1 if prediction == i else 0 for i in range(3)],
+    labels={"x": "Calidad", "y": "Probabilidad"},
+    title="Predicción de Calidad del Vino",
+    color=["red", "orange", "green"],
+)
+st.plotly_chart(fig)
